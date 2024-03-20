@@ -63,13 +63,13 @@ import JSON5 from "json5";
                 target: page,
                 query: weaponStrings[index]
             }).then((data => {
-                if(data.status == 200) {
+                if(data.status == 200) { //IIRC, the MediaWiki API will never return any successes other than 200
                     //move the file to the "done" folder
-                    console.info(data.target + " processed.");
+                    console.info(`${data.target} returned ${data.status}. URL: ${data.redirect}.`);
                     rename(`${pendingPath}\\${entries[index]}`, `${donePath}\\${entries[index]}`);
                 }
                 else {
-                    console.error(data.name + "process failure.");
+                    console.error(`${data.target} returned ${data.status}. Process failed.`);
                 }
             }));
         }, 5, 2);
