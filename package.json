@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "@types/node": "^20.11.29",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8.57.0",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.2"
+  },
+  "name": "clementine-wiki-bot",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "json5": "^2.2.3",
+    "mwn": "^2.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mika",
+  "license": "ISC",
+  "description": ""
+}

@@ -1,0 +1,6 @@
+*.code-workspace
+launch.json
+node_modules/*
+gitignore
+.env*
+data/*
