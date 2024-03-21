@@ -9,14 +9,13 @@ function binaryToCargo(boolean: 0|1|boolean) {
 }
 
 
-//these are not arbitrary - they match the allowed values declared in the cargo templates.
-const allowedValues = {
+//these are not arbitrary - they match the allowed values declared in the cargo templates
+const positionToName = {
     sex: ["Male","Female"],
     race: ["Human","Newman","CAST","Beast"],
     class: ["Hunter","Ranger","Force","Fighgunner","Guntecher","Wartecher","Fortefighter","Fortegunner","Fortetecher","Protranser","Acrofighter","Acrotecher","Fighmaster","Gunmaster","Masterforce","Acromaster"],
     element: ["Neutral","Fire","Ice","Lightning","Ground","Light","Dark"],
 };
-
 /**
  * 
  */
@@ -134,6 +133,7 @@ type WeaponWikitext = {
     "self status id" : number
     "self status level" : number
     "self status chance" : number
+    //Unfolded Status Effect Inflicts
     "neutral status id" : number
     "neutral status level" : number
     "neutral status chance" : number
@@ -160,9 +160,14 @@ type WeaponWikitext = {
     "set bonus" : number[]
     "model id" : number
     "visual effect id" : number
-    "sound effect id 1" : number
-    "sound effect id 2" : number
-    "hitbox" : number[]
+    //Unfolded Sound Effect ID
+    "sound bank id" : number
+    "sound effect id" : number
+    //Unfolded Hitbox
+    "weapon range": number
+    "normal attack width": number
+    "normal attack angle": number
+    "normal attack height": number
 }
 
 /**
@@ -243,9 +248,12 @@ export class Weapon {
         "set bonus": [],
         "model id": 0,
         "visual effect id": 0,
-        "sound effect id 1": 0,
-        "sound effect id 2": 0,
-        hitbox: []
+        "sound bank id": 0,
+        "sound effect id": 0,
+        "weapon range": 0,
+        "normal attack width": 0,
+        "normal attack angle": 0,
+        "normal attack height": 0
     };
     constructor(weapon: WeaponJson) {
         //item properties
@@ -260,9 +268,9 @@ export class Weapon {
 
         //requirements
         this.props["stat required"] = weapon.requirement.stat;
-        this.props.sex = Weapon.convertBooleanArrayToStringArray(weapon.requirement.sex, allowedValues.sex); 
-        this.props.race = Weapon.convertBooleanArrayToStringArray(weapon.requirement.race, allowedValues.race);
-        this.props.class = Weapon.convertBooleanArrayToStringArray(weapon.requirement.class, allowedValues.class);
+        this.props.sex = Weapon.convertBooleanArrayToStringArray(weapon.requirement.sex, positionToName.sex); 
+        this.props.race = Weapon.convertBooleanArrayToStringArray(weapon.requirement.race, positionToName.race);
+        this.props.class = Weapon.convertBooleanArrayToStringArray(weapon.requirement.class, positionToName.class);
 
         //stats
         this.props.variance = weapon.stat.attack_variance;
@@ -273,7 +281,7 @@ export class Weapon {
         this.props["max target"] = weapon.stat.max_target;
         this.props["pp tick"] = weapon.stat.pp_recovery_tick;
         this.props["pp normal"] = weapon.stat.pp_recovery_attack;
-        this.props.elements = weapon.stat.available_element.map((_x, i) => allowedValues.element[i]);
+        this.props.elements = weapon.stat.available_element.map((_x, i) => positionToName.element[i]);
 
         //stats: modifiers
         this.props.atp = weapon.stat.modifier.atp;
@@ -301,9 +309,14 @@ export class Weapon {
         this.props["set bonus"] = weapon.meta_data.set_bonus_id;
         this.props["model id"] = weapon.meta_data.model_id;
         this.props["visual effect id"] = weapon.meta_data.visual_effect_id;
-        this.props["sound effect id 1"] = weapon.meta_data.sound_effect_id[0];
-        this.props["sound effect id 2"] = weapon.meta_data.sound_effect_id[1];
-        this.props.hitbox = weapon.meta_data.hit_box;
+
+        this.props["sound bank id"] = weapon.meta_data.sound_effect_id[0];
+        this.props["sound effect id"] = weapon.meta_data.sound_effect_id[1];
+
+        this.props["weapon range"] = weapon.meta_data.hit_box[0];
+        this.props["normal attack width"] = weapon.meta_data.hit_box[1];
+        this.props["normal attack angle"] = weapon.meta_data.hit_box[2];
+        this.props["normal attack height"]  = weapon.meta_data.hit_box[3];
 
         //attack data
         this.props.miss = binaryToCargo(weapon.attack_data.can_miss);
