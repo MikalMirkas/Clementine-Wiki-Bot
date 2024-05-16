@@ -8,16 +8,15 @@ function binaryToCargo(boolean: 0|1|boolean) {
     return boolean ? "Yes" : "No";
 }
 
-
-//these are not arbitrary - they match the allowed values declared in the cargo templates
-const positionToName = {
+const positionToName = { //these are not arbitrary - they match the allowed values declared in the cargo stores
     sex: ["Male","Female"],
     race: ["Human","Newman","CAST","Beast"],
     class: ["Hunter","Ranger","Force","Fighgunner","Guntecher","Wartecher","Fortefighter","Fortegunner","Fortetecher","Protranser","Acrofighter","Acrotecher","Fighmaster","Gunmaster","Masterforce","Acromaster"],
     element: ["Neutral","Fire","Ice","Lightning","Ground","Light","Dark"],
 };
+
 /**
- * 
+ * The shape of what an expected weapon JSON looks like.
  */
 export type WeaponJson = {
     item_id: string;
@@ -34,11 +33,13 @@ export type WeaponJson = {
         class: [0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1, 0|1];
     };
     stat: {
+        penetration_override: boolean;
         attack_variance: number;
         max_attack: number[];
         max_pp: number[];
         hit_rate: number;
         max_grind: number;
+        grind_rate_variance?: number;
         max_target: number;
         pp_recovery_tick: number;
         pp_recovery_attack: number;
@@ -75,6 +76,15 @@ export type WeaponJson = {
         hit_box: number[];
     };
     attack_data: {
+        rcsm_data?: {
+            fire_time: number;
+            penetration_flag: number;
+            number_of_shot: number;
+            bullet_type: number;
+            bullet_velocity: number;
+            bullet_size: number;
+            bullet_range: number;
+        };
         can_miss: boolean;
         can_back_attack: boolean;
         hit_flag: number;
@@ -82,10 +92,20 @@ export type WeaponJson = {
         inflict_target_status: [[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number],[number,number,number]];
     };
     account_bound: 0|1;
+    properties?: {
+        can_sell: boolean;
+        can_drop: boolean;
+        can_trade: boolean;
+        can_store: boolean;
+        can_max_grind_down: boolean;
+        can_grind_repair: boolean;
+        can_reskin: boolean;
+        can_player_shop: boolean;
+    }
 }
 
 /**
- * 
+ * The shape of what the Weapon PageForm looks like.
  */
 type WeaponWikitext = {
     "id" : string;
@@ -108,6 +128,7 @@ type WeaponWikitext = {
     "max target" : number;
     "pp tick" : number;
     "pp normal" : number;
+    "pen override": "Yes"|"No";
     "elements" : string[];
     "atp" : number
     "ata" : number
@@ -168,10 +189,18 @@ type WeaponWikitext = {
     "normal attack width": number
     "normal attack angle": number
     "normal attack height": number
+    //RCSM Data
+    "rcsm fire time": number,
+    "rcsm penetration flag": number,
+    "rcsm number of shot": number,
+    "rcsm bullet type": number,
+    "rcsm bullet velocity": number,
+    "rcsm bullet size": number,
+    "rcsm bullet range": number,
 }
 
 /**
- * Data container for the Weapon PageForms form.
+ * Data container for the Weapon PageForm.
  *
  * @class Weapon
  */
@@ -253,7 +282,16 @@ export class Weapon {
         "weapon range": 0,
         "normal attack width": 0,
         "normal attack angle": 0,
-        "normal attack height": 0
+        "normal attack height": 0,
+        "pen override": "No",
+        //RCSM Props
+        "rcsm fire time": 0,
+        "rcsm penetration flag": 0,
+        "rcsm number of shot": 0,
+        "rcsm bullet type": 0,
+        "rcsm bullet velocity": 0,
+        "rcsm bullet size": 0,
+        "rcsm bullet range": 0,
     };
     constructor(weapon: WeaponJson) {
         //item properties
@@ -281,7 +319,9 @@ export class Weapon {
         this.props["max target"] = weapon.stat.max_target;
         this.props["pp tick"] = weapon.stat.pp_recovery_tick;
         this.props["pp normal"] = weapon.stat.pp_recovery_attack;
+        this.props["pen override"] = binaryToCargo(weapon.stat.penetration_override);
         this.props.elements = weapon.stat.available_element.map((_x, i) => positionToName.element[i]);
+        
 
         //stats: modifiers
         this.props.atp = weapon.stat.modifier.atp;
@@ -306,7 +346,7 @@ export class Weapon {
         //metadata
         this.props["equip hand"] = weapon.meta_data.equip_hand;
         this.props["weapon type flag"] = weapon.meta_data.weapon_type_flag;
-        this.props["set bonus"] = weapon.meta_data.set_bonus_id;
+        this.props["set bonus"] = weapon.meta_data.set_bonus_id || [0];
         this.props["model id"] = weapon.meta_data.model_id;
         this.props["visual effect id"] = weapon.meta_data.visual_effect_id;
 
@@ -346,6 +386,18 @@ export class Weapon {
         this.props["dark status id"]  = weapon.attack_data.inflict_target_status[6][0];
         this.props["dark status level"]  = weapon.attack_data.inflict_target_status[6][1];
         this.props["dark status chance"]  = weapon.attack_data.inflict_target_status[6][2];
+
+        //RCSM Data
+        if(weapon.attack_data.rcsm_data)
+        {
+            this.props["rcsm fire time"] = weapon.attack_data.rcsm_data.fire_time;
+            this.props["rcsm penetration flag"] = weapon.attack_data.rcsm_data.penetration_flag;
+            this.props["rcsm number of shot"] = weapon.attack_data.rcsm_data.number_of_shot;
+            this.props["rcsm bullet type"] = weapon.attack_data.rcsm_data.bullet_type;
+            this.props["rcsm bullet velocity"] = weapon.attack_data.rcsm_data.bullet_velocity;
+            this.props["rcsm bullet size"] = weapon.attack_data.rcsm_data.bullet_size;
+            this.props["rcsm bullet range"] = weapon.attack_data.rcsm_data.bullet_range;
+        }
     }
 
     /**
