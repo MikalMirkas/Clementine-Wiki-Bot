@@ -36,15 +36,18 @@ interface BuffDataList {
     status_resistance: number[]
 }
 
-interface EnemyAttackData {
-    element_group: number,  //element
+export interface DamageModifier {
+    strike_mod: number,
+    ranged_mod: number,
+    technic_mod: number
+}
+
+export interface EnemyAttackData {
+    element_group: number,                  //element
     attack_list: [{
         id: number,
-        type: 0|1,          //0: ATP, 1: TP
-        modifier: {         //multiplicative
-            damage_stat: number,
-            accuracy: number,
-        },
+        type: 0|1,                          //0: ATP, 1: TP
+        modifier: EnemyStatContribution,    //multiplicative for damage
         element: {
             id: number,
             amount: number,
@@ -56,7 +59,33 @@ interface EnemyAttackData {
     }]
 }
 
-interface DamageContribution {
+interface EnemyStatContribution {
+    strike_mod: number,
+    technic_mod: number
+}
+
+export interface BossAttackData {
+    attack_id: number,
+    attack_modifier: BossStatContribution,
+    status_effect: StatusEffect
+}
+
+interface BossStatContribution {
+    strike_mod: number,
+    accuracy: number,
+    technic_mod: number
+}
+
+interface BossStatModifier {
+    hp: number,
+    atp: number,
+    ata: number,
+    tp: number,
+    dfp: number,
+    evp: number,
+    mst: number,
+    sta: number,
+    exp: number,
     strike_mod: number,
     ranged_mod: number,
     technic_mod: number
@@ -64,7 +93,7 @@ interface DamageContribution {
 
 /*
     Economy / Storage Concepts
-*/
+ */
 
 interface LegacySellableItemJson {
     price: [
@@ -715,7 +744,7 @@ export interface WeaponJson extends ItemJson, EquippableJson, LegacySellableItem
 /* 
     Entities
 */
-export interface EnemyJsonSchema {
+export interface EnemyJson {
     name: string,
     id: number,
     element: [
@@ -729,52 +758,15 @@ export interface EnemyJsonSchema {
         magic: BuffDataList,
         boot: BuffDataList
     ],
-    hitbox_modifier: DamageContribution[],
+    hitbox_modifier: BossStatContribution[],
     attack_data: EnemyAttackData[]
 }
 
-/* type EnemyWikitext = {
-
-}
-
-export class PageFormEnemy {
-
-}*/
-
-interface BossAttackData {
-    attack_id: number,
-    attack_modifier: DamageContribution,
-    status_effect: StatusEffect
-}
-
-export interface BossJsonSchema {
+export interface BossJson {
     boss_id: number,
     element: number,
     name: string,
-    stat_modifier: [
-        hp: number,
-        atp: number,
-        ata: number,
-        tp: number,
-        dfp: number,
-        evp: number,
-        mst: number,
-        sta: number,
-        exp: number,
-        strike_mod: number,
-        ranged_mod: number,
-        technic_mod: number
-    ],
+    stat_modifier: BossStatModifier,
     attack_data: BossAttackData[],
-    hitbox_modifier: DamageContribution[]
+    hitbox_modifier: BossStatContribution[]
 }
-
-/*
-type BossWikitext = {
-
-}
-
-export class PageFormBoss {
-    
-}
-*/

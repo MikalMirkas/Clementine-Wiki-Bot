@@ -1,5 +1,5 @@
-import { PageFormWeapon } from "./data/structure";
-import { ItemJson, BoardJson, BoostJson, ClothingJson, ConsumableJson, EventJson, GrinderJson, LineshieldJson, MaterialJson, PADiscJson, PartJson, PMDeviceJson, RoomDecorationJson, RoomMusicJson, RoomTicketJson, UnitJson, WeaponJson, EnemyJsonSchema } from "./data/schemas";
+import { PageFormWeapon } from "./data/format";
+import { ItemJson, BoardJson, BoostJson, ClothingJson, ConsumableJson, EventJson, GrinderJson, LineshieldJson, MaterialJson, PADiscJson, PartJson, PMDeviceJson, RoomDecorationJson, RoomMusicJson, RoomTicketJson, UnitJson, WeaponJson, EnemyJson } from "./data/schemas";
 import { Mwn } from "mwn";
 import { readFile, opendir, rename } from "fs/promises";
 import JSON5 from "json5";
@@ -11,19 +11,20 @@ import { ambiguations, blacklist, new_style_pages } from "./filter";
  * @param data 
  * @returns 
  */
-function parseData(data: BoardJson | BoostJson | ClothingJson | ConsumableJson | EventJson | GrinderJson | LineshieldJson | MaterialJson | PADiscJson | PartJson | PMDeviceJson | RoomDecorationJson | RoomMusicJson | RoomTicketJson | UnitJson | WeaponJson | EnemyJsonSchema): PageFormWeapon {
+function parseData(data: BoardJson | BoostJson | ClothingJson | ConsumableJson | EventJson | GrinderJson | LineshieldJson | MaterialJson | PADiscJson | PartJson | PMDeviceJson | RoomDecorationJson | RoomMusicJson | RoomTicketJson | UnitJson | WeaponJson | EnemyJson): PageFormWeapon {
     let result: PageFormWeapon;
 
-    /**
+    /*
      * In the context of this program, data falls into one of several categories:
-     * - A Boss enemy
-     * - An item, or any of its logical children; including its properties
-     * 
-     * - An enemy's drop table
-     * - A board extension (Synthesis)
-     * - Loot
-     * - Photon Arts (not implemented)
-     */
+     */ 
+    // - A Boss enemy (enemy/boss/*/.json)
+    // - A standard enemy (enemy/normal/*/.json)
+    // - An item, or any of its logical children; including its properties (item_database/*/.json)
+    // - An enemy's drop table
+    // - A board extension (Synthesis)
+    // - Loot
+    // - Photon Arts (not implemented)
+     
     /*if(data as EnemyJson) {
         throw new Error("Enemy not implemented.");
     }
@@ -124,36 +125,36 @@ async function uploadFile(pendingPath: string, donePath: string) {
         const contents: string = await readFile(`${pendingPath}\\${entries[i]}`, { encoding: "utf8" });
         const entity = parseData(JSON5.parse(contents));
 
-        if(!blacklist.includes(entity.props.id)) {
+        if(!blacklist.includes(entity.id)) {
             //psu/clem's parser has strange symbol encoding
-            entity.props.name = entity.props.name.replaceAll(new RegExp(/<(?<digits>.+)>/g), (_match: unknown, digits: string) => {
+            entity.name = entity.name.replaceAll(new RegExp(/<(?<digits>.+)>/g), (_match: unknown, digits: string) => {
                 return String.fromCharCode(parseInt(digits, 16));
             });
 
             //hack for all new items after June 2024
-            if(new_style_pages.includes(entity.props.id)) {
-                entity.props.generate = "Yes"; //defaults to No server-side
+            if(new_style_pages.includes(entity.id)) {
+                entity.generate = "Yes"; //defaults to No server-side
             }
         
             //required for batch operation
             entriesToWiki.push(entries[i]);
             try {
                 //figure out what category the JSON is
-                queryStrings.push(PageFormWeapon.constructQueryString(entity.props));
+                queryStrings.push(PageFormWeapon.constructQueryString(entity));
             }
             catch (error) {
-                console.log(`${entity.props.name} threw an error: ${error}`);
+                console.log(`${entity.name} threw an error: ${error}`);
             }
 
-            if(ambiguations.includes(entity.props.name)) {
-                entity.props.name = `${entity.props.name}/${entity.props.rarity + 1}★`; //this assumes that there will never be a weapon with the same rarity and name, god help us if there is
+            if(ambiguations.includes(entity.name)) {
+                entity.name = `${entity.name}/${entity.rarity + 1}★`; //this assumes that there will never be a weapon with the same rarity and name, god help us if there is
             }
-            destinations.push(entity.props.name);
+            destinations.push(entity.name);
         }
         else
         {
             //otherwise it is an aesthetic change of a weapon, bob doesn't want individual pages for them.
-            console.log(`Skipping over filtered item: ${entity.props.id} / ${entity.props.name}`);
+            console.log(`Skipping over filtered item: ${entity.id} / ${entity.name}`);
             try {
                 rename(`${pendingPath}\\${entries[i]}`, `${donePath}\\${entries[i]}`);
             }
