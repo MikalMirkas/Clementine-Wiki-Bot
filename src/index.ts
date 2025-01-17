@@ -3,7 +3,7 @@ import { ItemJson, BoardJson, BoostJson, ClothingJson, ConsumableJson, EventJson
 import { Mwn } from "mwn";
 import { readFile, opendir, rename } from "fs/promises";
 import JSON5 from "json5";
-import { ambiguations, blacklist, new_style_pages } from "./filter";
+import { ambiguations, blacklist, new_style_pages } from "./data/filter";
 
 
 /**

@@ -1,4 +1,8 @@
-//These IDs will be skipped during processing.
+/** 
+ * @file Contains the IDs to be skipped during processing.
+ * This current filter is a stopgap and is currently planned to be remove in a future version.
+*/
+
 export const blacklist = [
     "01020000", //Knuckles (fix me)
     "01011A03", "01013E03", "01013F03", "01014003", "01014103", //Test weapons (Daisy Chain)
