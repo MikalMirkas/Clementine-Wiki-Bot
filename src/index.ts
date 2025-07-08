@@ -5,7 +5,6 @@ import { readFile, opendir, rename } from "fs/promises";
 import JSON5 from "json5";
 import { ambiguations, blacklist, new_style_pages } from "./data/filter";
 
-
 /**
  * Determines the type of PSUC data file that is provided.
  * @param data 

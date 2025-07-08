@@ -2,10 +2,10 @@
  * @file Contains the transformations and relevant data structures for converting the schemas to a form's format. 
  */
 
-import { WeaponJson, BossAttackData, EnemyAttackData } from "./schemas";
+import { ItemJson, SynthesisJson, SynthesisTableJson, WeaponJson } from "./schemas";
 
 /*
- * UTILITY TABLES/FUNCTIONS
+ * UTILITIES
  */
 
 type CargoBoolean = "Yes" | "No";
@@ -23,6 +23,9 @@ export function binaryToCargo(boolean: 0|1|boolean): CargoBoolean {
 
 /* 
  * Magic index resolution table
+ * These are used for resolving the JSON magic indexes and placing them in a Cargo list. 
+ * 
+ * TO-DO: Benchmark whether using Cargo lists are faster than making their own dedicated tables for them.
  */
 export const magicIndexes = { 
     sex: ["Male","Female"],
@@ -34,7 +37,8 @@ export const magicIndexes = {
 /* 
  * ACTORS
  */
-export class PageFormEnemy {
+
+/* export class PageFormEnemy {
     enemy_id: number;
     
     attack?: EnemyAttackData[];
@@ -43,9 +47,9 @@ export class PageFormEnemy {
         this.enemy_id = enemy_id;
         this.attack = attack;
     }
-}
+}*/
 
-export class PageFormBoss {
+/*export class PageFormBoss {
     boss_id: number;
     element: number;
     name: string;
@@ -54,19 +58,89 @@ export class PageFormBoss {
     constructor() {
 
     }
+} */
+
+/*
+ * SYNTHESIS
+ */
+
+class PageFormSynthesisTable {
+    board_id: string;
+    material_table: {
+        material: string
+        quantity: number
+    }[] = [];
+    item_id: string;
+    element: number;
+    element_percent?: number;
+    constructor(parent: string, table: SynthesisTableJson) {
+        for (let i = 0; i < table.material_table.length; i++) {
+            const material = table.material_table[i][0];
+            const quantity = table.material_table[i][1];
+
+            this.material_table.push({
+                material: material,
+                quantity: quantity
+            });
+        }
+        this.board_id = parent;
+        this.item_id = table.item_id[0]; //god help us if this changes
+        this.element = table.element;
+        this.element_percent = table.element_percent;
+    }
+}
+
+class PageFormSynthesis {
+    board_id: string;
+    success_rate: number;
+    max_nb_craft: number;
+    craft_time: number;
+    bot_stat: {
+        striking: number,
+        ranged: number,
+        technic: number,
+        armor: number,
+        unknown: number,
+    };
+    select_quantity: boolean;
+    select_slot: [
+        0|1|2, 0|1|2, 0|1|2, 0|1|2
+    ];
+    synthesis_table: PageFormSynthesisTable[];
+    constructor(synthesis: SynthesisJson)
+    {
+        this.board_id = synthesis.board_id;
+        this.success_rate = synthesis.success_rate;
+        this.max_nb_craft = synthesis.max_nb_craft;
+        this.craft_time = synthesis.craft_time;
+        this.bot_stat = {
+            striking: synthesis.bot_stat[0],
+            ranged: synthesis.bot_stat[1],
+            technic: synthesis.bot_stat[2],
+            armor: synthesis.bot_stat[3],
+            unknown: synthesis.bot_stat[4],
+        };
+        this.select_quantity = synthesis.select_quantity;
+        this.select_slot = synthesis.select_slot;
+
+        const synth_table: PageFormSynthesisTable[] = [];
+        for (let i = 0; i < synthesis.synthesis_table.length; i++) {
+            const element = new PageFormSynthesisTable(
+                this.board_id, synthesis.synthesis_table[0][i]
+            );
+            synth_table.push(element);
+        }
+        this.synthesis_table = synth_table;
+    }
 }
 
 /* 
  * ITEMS
  */
 
-/**
- * Data container for the Weapon PageForm.
- *
- * @export
- * @class PageFormWeapon
- */
-export class PageFormWeapon {
+//TODO: Consider mixins instead for maintainability?
+
+class PageFormItem {
     id: string;
     name: string;
     description: string;
@@ -74,7 +148,25 @@ export class PageFormWeapon {
     rank: number;
     "buy price": number;
     "sell price": number;
-    "account bound": CargoBoolean;
+    "account bound"?: CargoBoolean;
+    constructor(item: ItemJson) {
+        //assignments
+        this.id = item.item_id;
+        this.name = item.name;
+        this.description = item.description;
+        this.rarity = item.rarity;
+        this.rank = item.rank;
+    }
+}
+
+/**
+ * Data container for the Weapon PageForm.
+ *
+ * @export
+ * @class PageFormWeapon
+ */
+export class PageFormWeapon extends PageFormItem {
+    declare "account bound": CargoBoolean;
     "stat required": number;
     sex: string[] = [];
     race: string[] = [];
@@ -147,16 +239,24 @@ export class PageFormWeapon {
     "normal attack height": number;
     "pen override": CargoBoolean;
     //RCSM Props
-    "rcsm fire time": number;
-    "rcsm penetration flag": number;
-    "rcsm number of shot": number;
-    "rcsm bullet type": number;
-    "rcsm bullet velocity": number;
-    "rcsm bullet size": number;
-    "rcsm bullet range": number;
-    "generate": CargoBoolean | undefined;
+    "rcsm fire time"?: number;
+    "rcsm penetration flag"?: number;
+    "rcsm number of shot"?: number;
+    "rcsm bullet type"?: number;
+    "rcsm bullet velocity"?: number;
+    "rcsm bullet size"?: number;
+    "rcsm bullet range"?: number;
+    "generate": CargoBoolean  = "Yes";
     constructor(weapon: WeaponJson) {
         //item properties
+        super({
+            item_id: weapon.item_id,
+            name: weapon.name,
+            description: weapon.description,
+            rarity: weapon.rarity,
+            rank: weapon.rank,
+            sort_order: weapon.sort_order
+        });
         this.id = weapon.item_id;
         this.name = weapon.name;
         this.description = weapon.description;
@@ -188,7 +288,7 @@ export class PageFormWeapon {
         //stats: modifiers
         this.atp = weapon.stat.modifier.atp;
         this.ata = weapon.stat.modifier.ata;
-        this.dfp = weapon.stat.modifier.ata;
+        this.dfp = weapon.stat.modifier.dfp;
         this.tp = weapon.stat.modifier.tp;
         this.evp = weapon.stat.modifier.evp;
         this.mst = weapon.stat.modifier.mst;
@@ -282,7 +382,9 @@ export class PageFormWeapon {
 
         query = Object.entries(props)
             .map(([key, val]) => {
-                return `${form}[${encodeURIComponent(key)}] += ${encodeURIComponent(val.toString())}`; //the + is a hack to allow + weapons to go through. not sure what exactly causes it, but lmao
+                if(val != undefined) {
+                    return `${form}[${encodeURIComponent(key)}] += ${encodeURIComponent(val.toString())}`; //the + is a hack to allow + weapons to go through. not sure what exactly causes it, but lmao
+                }
             })
             .join("&");
 
@@ -290,42 +392,42 @@ export class PageFormWeapon {
     }
 }
 
-export class PageFormLineShield {
+export class PageFormLineShield extends PageFormItem {
 
 }
-export class PageFormPlayerConsumable {
+export class PageFormPlayerConsumable extends PageFormItem {
     
 }
-export class PageFormPhotonArtDisc {
+export class PageFormPhotonArtDisc extends PageFormItem {
     
 }
-export class PageFormMaterial {
+export class PageFormMaterial extends PageFormItem {
     
 }
-export class PageFormUnit {
+export class PageFormUnit extends PageFormItem {
     
 }
-export class PageFormCosmetic {
+export class PageFormCosmetic extends PageFormItem {
     
 }
-export class PageFormRoomConsumable {
+export class PageFormRoomConsumable extends PageFormItem {
     
 }
-export class PageFormTrap {
+export class PageFormTrap extends PageFormItem {
     
 }
-export class PageFormBoard {
+export class PageFormBoard extends PageFormItem {
     
 }
-export class PageFormPartnerMachineDevice {
+export class PageFormPartnerMachineDevice extends PageFormItem {
     
 }
-export class PageFormGrinder {
+export class PageFormGrinder extends PageFormItem {
     
 }
-export class PageFormBoost {
+export class PageFormBoost extends PageFormItem {
     
 }
-export class PageFormEvent {
+export class PageFormEvent extends PageFormItem {
     
 }

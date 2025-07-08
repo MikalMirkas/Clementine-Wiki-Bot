@@ -1,6 +1,6 @@
 /** 
  * @file Contains the IDs to be skipped during processing.
- * This current filter is a stopgap and is currently planned to be remove in a future version.
+ * This current filter is a stopgap and is currently planned to be removed in a future version.
 */
 
 export const blacklist = [
@@ -34,7 +34,7 @@ export const blacklist = [
     "01192003", "01193103", "01193203", "01193303", "01193403", //Test weapons (Cursed Barbatos)
     "011A1C03", "011A2503", "011A2603", "011A2703", "011A2803", //Test weapons (Sunrisers)
     "01180F03", "01013A03", "01012103", "01021A03", "01031003", "01030D03", "01030600", "01063603", "01062F03", "01081503", "01081D03", "01094A03", "01094B03", "01094103", "01095703", "01092803", "01091B03", "01151D03", "01150603", "010B0B03", "010B1503", "01141F03", "01142603", "01161103", "01161003", "01161303", "01161403", "01161603", "01160E03", "01160F03", "01161503", "01171903", "011B0302", "011A1303", "011A1603", //Unreleased weapons
-    "011BFE03", "011BFD03", "01043D03", "0114FF00", "011BFF03", "01152C03", "01060C01", "010CFF03", "0105FF03", "0115FF03", //Debug/admin weapons
+    "011BFE03", "011BFD03", "01043D03", "0114FF00", "011BFF03", "01060C01", "010CFF03", "0105FF03", "0115FF03", //Debug/admin weapons
     "011A1B03", "010F0C03", "01022603", "01141903", "01151403", "01171003", "01192303", "01192303", //Duplicate weapons
 ];
 
