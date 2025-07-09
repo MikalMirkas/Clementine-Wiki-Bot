@@ -6,19 +6,19 @@ Simple wiki bot to automate content changes.
 - Moves files that have been processed into its respective folder.
 
 ### Item Types Supported
-[x] Weapons
-[ ] Line Shields
-[ ] Consumables
-[ ] Photon Art Discs
-[ ] Materials
-[ ] Units
-[ ] Clothes / Parts
-[ ] Decorations / Music / Tickets
-[ ] Boards
-[ ] Partner Machine Devices
-[ ] Grinders
-[ ] Boosts
-[ ] Events
+- [x] Weapons
+- [ ] Line Shields
+- [ ] Consumables
+- [ ] Photon Art Discs
+- [ ] Materials
+- [ ] Units
+- [ ] Clothes / Parts
+- [ ] Decorations / Music / Tickets
+- [ ] Boards
+- [ ] Partner Machine Devices
+- [ ] Grinders
+- [ ] Boosts
+- [ ] Events
 
 ## Setup
 The project scans for several files during runtime. Failure to provide expected data for any of the searches will result in exceptions being thrown.
