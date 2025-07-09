@@ -167,7 +167,6 @@ async function uploadFile(pendingPath: string, donePath: string) {
     }
 
     //send files
-    /* */
     const maxSizePerBatch = 50;
     const batches = Math.ceil(destinations.length / maxSizePerBatch);
 
@@ -210,7 +209,7 @@ async function uploadFile(pendingPath: string, donePath: string) {
                 }
             }), (async data => {
                 if(data.code == "invalidjson") {
-                    console.log(`Response for ${batchedEntriesToWiki[index]} returned error code ${data.code}`); //??????
+                    console.log(`Response for ${batchedEntriesToWiki[index]} returned error code ${data.code}`); //syntax error in axios
                     try {
                         await rename(`${pendingPath}\\${batchedEntriesToWiki[index]}`, `${donePath}\\${batchedEntriesToWiki[index]}`);
                     }
@@ -222,10 +221,10 @@ async function uploadFile(pendingPath: string, donePath: string) {
                     }
                 }
                 else if(data.response.status) {
-                    console.error(`Response returned ${data.response.status}.`);
+                    console.error(`Response returned an error: ${data.message}.`);
                 }
             }));
-        }, 5, 2);
+        }, 10, 2);
     }
 }
 
